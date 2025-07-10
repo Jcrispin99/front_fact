@@ -1,4 +1,4 @@
-  const API_BASE_URL = 'http://127.0.0.1:8000';
+const API_BASE_URL = 'http://127.0.0.1:8000/api/v1';
 
 export interface LoginCredentials {
   email: string;
@@ -99,33 +99,49 @@ export class AuthService {
   }
 
   isAuthenticated(): boolean {
+    if (typeof window === 'undefined') return false;
     return !!this.getAccessToken();
   }
 
   private setTokens(tokens: AuthTokens): void {
+    // Verificar si estamos en el cliente
+    if (typeof window === 'undefined') return;
+    
     localStorage.setItem('access_token', tokens.access);
     localStorage.setItem('refresh_token', tokens.refresh);
     
     // También establecer cookies para el middleware
-    document.cookie = `access_token=${tokens.access}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax`;
-    document.cookie = `refresh_token=${tokens.refresh}; path=/; max-age=${60 * 60 * 24 * 30}; SameSite=Lax`;
+    if (typeof document !== 'undefined') {
+      document.cookie = `access_token=${tokens.access}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax`;
+      document.cookie = `refresh_token=${tokens.refresh}; path=/; max-age=${60 * 60 * 24 * 30}; SameSite=Lax`;
+    }
   }
 
+  // Problema: Uso de localStorage en el servidor
   private getAccessToken(): string | null {
+    // Verificar si estamos en el cliente
+    if (typeof window === 'undefined') return null;
     return localStorage.getItem('access_token');
   }
 
   private getRefreshToken(): string | null {
+    // Verificar si estamos en el cliente
+    if (typeof window === 'undefined') return null;
     return localStorage.getItem('refresh_token');
   }
 
   private clearTokens(): void {
+    // Verificar si estamos en el cliente
+    if (typeof window === 'undefined') return;
+    
     localStorage.removeItem('access_token');
     localStorage.removeItem('refresh_token');
     
     // También limpiar cookies
-    document.cookie = 'access_token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
-    document.cookie = 'refresh_token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+    if (typeof document !== 'undefined') {
+      document.cookie = 'access_token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+      document.cookie = 'refresh_token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+    }
   }
 
   getAuthHeader(): Record<string, string> {

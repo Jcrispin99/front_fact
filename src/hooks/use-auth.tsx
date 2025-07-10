@@ -35,7 +35,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     } catch (error) {
       console.error('Error checking auth status:', error);
+      // No crear usuario falso, simplemente limpiar la sesión
       authService.logout();
+      setUser(null);
     } finally {
       setIsLoading(false);
     }
@@ -47,6 +49,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setError(null);
       
       await authService.login(credentials);
+      
+      // Obtener datos del usuario después del login exitoso
       const userData = await authService.getCurrentUser();
       setUser(userData);
       

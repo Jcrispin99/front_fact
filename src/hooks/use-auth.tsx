@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useEffect, createContext, useContext, ReactNode } from 'react';
-import { authService, LoginCredentials, User } from '@/lib/auth';
+import { authService, LoginCredentials } from '@/lib/auth';
+import { User } from '@/lib/api';
 import { useRouter } from 'next/navigation';
 
 interface AuthContextType {
@@ -11,6 +12,7 @@ interface AuthContextType {
   login: (credentials: LoginCredentials) => Promise<void>;
   logout: () => void;
   error: string | null;
+   refreshUser: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -19,6 +21,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const refreshUser = async () => {
+    setIsLoading(true);
+    try {
+      const userData = await authService.getCurrentUser();
+      setUser(userData);
+    } catch (error) {
+      console.error('Error refreshing user data:', error);
+      // Optionally handle the error, e.g., by logging out the user
+      // if the token is invalid and cannot be refreshed.
+    } finally {
+      setIsLoading(false);
+    }
+  };
   const router = useRouter();
 
   const isAuthenticated = !!user;
@@ -56,9 +72,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       
       router.push('/dashboard');
     } catch (error) {
+      console.error("Login failed:", error); // Bueno para depuración
       const errorMessage = error instanceof Error ? error.message : 'Error al iniciar sesión';
       setError(errorMessage);
-      throw error;
+      // No es necesario relanzar el error, el estado `error` del hook es suficiente para que la UI reaccione.
     } finally {
       setIsLoading(false);
     }
@@ -78,6 +95,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     login,
     logout,
     error,
+    refreshUser,
   };
 
   return (
@@ -95,28 +113,9 @@ export function useAuth() {
   return context;
 }
 
-// Hook simple para usar en componentes que no necesitan el contexto completo
+// Hook simple para verificar el estado de autenticación sin acceder a todo el contexto.
+// Utiliza el contexto principal para evitar llamadas de API y estados redundantes.
 export function useAuthStatus() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        if (authService.isAuthenticated()) {
-          await authService.getCurrentUser();
-          setIsAuthenticated(true);
-        }
-      } catch (error) {
-        setIsAuthenticated(false);
-        authService.logout();
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    checkAuth();
-  }, []);
-
+  const { isAuthenticated, isLoading } = useAuth();
   return { isAuthenticated, isLoading };
 }

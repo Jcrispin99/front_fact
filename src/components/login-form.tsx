@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { cn } from "@/lib/utils"
+import { AlertCircle } from 'lucide-react';
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -90,8 +91,9 @@ export function LoginForm({
           <form onSubmit={handleSubmit}>
             <div className="flex flex-col gap-6">
               {error && (
-                <div className="p-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-md">
-                  {error}
+                <div className="flex items-center gap-2 p-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-md">
+                  <AlertCircle className="h-4 w-4" />
+                  <span>{error}</span>
                 </div>
               )}
               

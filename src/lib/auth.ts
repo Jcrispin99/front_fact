@@ -1,3 +1,5 @@
+import type { User } from './api'; // Importar el tipo User desde api.ts
+
 const API_BASE_URL = 'http://127.0.0.1:8000/api/v1';
 
 export interface LoginCredentials {
@@ -10,12 +12,7 @@ export interface AuthTokens {
   refresh: string;
 }
 
-export interface User {
-  id: number;
-  email: string;
-  first_name?: string;
-  last_name?: string;
-}
+// Elimina la interfaz User de este archivo para usar la de api.ts
 
 export class AuthService {
   private static instance: AuthService;
@@ -62,7 +59,8 @@ export class AuthService {
 
     if (!response.ok) {
       this.clearTokens();
-      throw new Error('Error al renovar el token');
+      const error = await response.json();
+      throw new Error(error.detail || 'Error al renovar el token. Tu sesión puede haber expirado.');
     }
 
     const tokens = await response.json();
@@ -76,7 +74,7 @@ export class AuthService {
       throw new Error('No access token available');
     }
 
-    const response = await fetch(`${API_BASE_URL}/auth/users/me/`, {
+    const response = await fetch(`${API_BASE_URL}/users/me/`, { // Corregido
       headers: {
         'Authorization': `Bearer ${token}`,
       },

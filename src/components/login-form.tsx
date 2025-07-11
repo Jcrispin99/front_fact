@@ -1,6 +1,5 @@
 'use client';
 
-import { useState } from 'react';
 import { cn } from "@/lib/utils"
 import { AlertCircle } from 'lucide-react';
 import { Button } from "@/components/ui/button"
@@ -15,68 +14,41 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useAuth } from '@/hooks/use-auth';
 import { LoginCredentials } from '@/lib/auth';
+import { useForm } from "@/hooks/use-form";
+
+const validationRules = {
+  email: (value: string) => {
+    if (!value) return 'El email es requerido';
+    if (!/\S+@\S+\.\S+/.test(value)) return 'El email no es válido';
+    return undefined;
+  },
+  password: (value: string) => {
+    if (!value) return 'La contraseña es requerida';
+    if (value.length < 4) return 'La contraseña debe tener al menos 4 caracteres';
+    return undefined;
+  },
+};
 
 export function LoginForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
-  const { login, isLoading, error } = useAuth();
-  const [formData, setFormData] = useState<LoginCredentials>({
-    email: '',
-    password: ''
-  });
-  const [formErrors, setFormErrors] = useState<Partial<LoginCredentials>>({});
+  const { login } = useAuth();
 
-  const validateForm = (): boolean => {
-    const errors: Partial<LoginCredentials> = {};
-    
-    if (!formData.email) {
-      errors.email = 'El email es requerido';
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      errors.email = 'El email no es válido';
+  const {
+    formData,
+    formErrors,
+    isLoading,
+    submissionError,
+    handleInputChange,
+    handleSubmit,
+  } = useForm<LoginCredentials>(
+    { email: '', password: '' },
+    validationRules,
+    async (data) => {
+      await login(data);
     }
-    
-    if (!formData.password) {
-      errors.password = 'La contraseña es requerida';
-    } else if (formData.password.length < 4) {
-      errors.password = 'La contraseña debe tener al menos 6 caracteres';
-    }
-    
-    setFormErrors(errors);
-    return Object.keys(errors).length === 0;
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!validateForm()) {
-      return;
-    }
-
-    try {
-      await login(formData);
-    } catch (error) {
-      // El error ya se maneja en el hook useAuth
-      console.error('Login failed:', error);
-    }
-  };
-
-  const handleInputChange = (field: keyof LoginCredentials) => (
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: e.target.value
-    }));
-    
-    // Limpiar error del campo cuando el usuario empiece a escribir
-    if (formErrors[field]) {
-      setFormErrors(prev => ({
-        ...prev,
-        [field]: undefined
-      }));
-    }
-  };
+  );
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
@@ -90,10 +62,10 @@ export function LoginForm({
         <CardContent>
           <form onSubmit={handleSubmit}>
             <div className="flex flex-col gap-6">
-              {error && (
+              {submissionError && (
                 <div className="flex items-center gap-2 p-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-md">
                   <AlertCircle className="h-4 w-4" />
-                  <span>{error}</span>
+                  <span>{submissionError}</span>
                 </div>
               )}
               
@@ -101,10 +73,11 @@ export function LoginForm({
                 <Label htmlFor="email">Email</Label>
                 <Input
                   id="email"
+                  name="email"
                   type="email"
                   placeholder="tu@email.com"
                   value={formData.email}
-                  onChange={handleInputChange('email')}
+                  onChange={handleInputChange}
                   className={formErrors.email ? 'border-red-500' : ''}
                   disabled={isLoading}
                   required
@@ -126,9 +99,10 @@ export function LoginForm({
                 </div>
                 <Input 
                   id="password" 
+                  name="password"
                   type="password" 
                   value={formData.password}
-                  onChange={handleInputChange('password')}
+                  onChange={handleInputChange}
                   className={formErrors.password ? 'border-red-500' : ''}
                   disabled={isLoading}
                   required 

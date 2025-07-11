@@ -3,6 +3,7 @@ import type { User } from './api'; // Importar el tipo User desde api.ts
 const API_BASE_URL = 'http://127.0.0.1:8000/api/v1';
 
 export interface LoginCredentials {
+   [key: string]: string;
   email: string;
   password: string;
 }

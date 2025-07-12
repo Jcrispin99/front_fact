@@ -3,10 +3,7 @@
 import * as React from "react"
 import {
   IconDashboard,
-  IconHelp,
   IconInnerShadowTop,
-  IconSearch,
-  IconSettings,
   IconUsers,
 } from "@tabler/icons-react"
 
@@ -26,8 +23,9 @@ import {
 
 import { useAuth } from '@/hooks/use-auth';
 
-const data = {
-  navMain: [
+export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const { user } = useAuth();
+  const navMain = [
     {
       title: "Dashboard",
       url: "/dashboard",
@@ -36,31 +34,27 @@ const data = {
     {
       title: "Profile",
       url: "/dashboard/profile",
-      icon: IconUsers,
+      icon: IconUsers, // Consider changing the icon to something more personal
     },
-  ],
-  navSecondary: [
-    {
-      title: "Settings",
-      url: "/dashboard/settings",
-      icon: IconSettings,
-    },
-    {
-      title: "Get Help",
-      url: "#",
-      icon: IconHelp,
-    },
-    {
-      title: "Search",
-      url: "#",
-      icon: IconSearch,
-    },
-  ],
-  documents: [],
-}
+  ];
 
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const { user } = useAuth();
+  // Conditional rendering for the 'Users' link
+  if (user?.is_super_admin || user?.is_admin) {
+    navMain.push({
+      title: "Usuarios",
+      url: "/dashboard/users", // Corrected URL
+      icon: IconUsers,
+    });
+  }
+
+  const data = {
+    navMain,
+    navSecondary: [
+// ... existing code ...
+      ],
+      documents: [],
+  }
+
   return (
     <Sidebar collapsible="offcanvas" {...props}>
       <SidebarHeader>

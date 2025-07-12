@@ -1,6 +1,6 @@
 // Re-exportar tipos desde el cliente de API para mantener compatibilidad
-export type { User, CreateUserData, UpdateUserData, UserFilters, ApiResponse, UserStats } from '@/lib/api';
-import type { User } from '@/lib/api';
+export type { User, CreateUserData, UpdateUserData, UserFilters, ApiResponse, UserStats } from '@/types/user';
+import type { User } from '@/types/user';
 
 export interface LoginCredentials {
   email: string;

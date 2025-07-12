@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useUsers, useUserPermissions } from '@/hooks/use-users';
-import { User, CreateUserData, UpdateUserData } from '@/lib/api';
+import { User, CreateUserData, UpdateUserData } from '@/types/user';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
-import { AlertCircle, Plus, Edit, Trash2, ToggleLeft, ToggleRight, Key, Users, BarChart3 } from 'lucide-react';
+import { AlertCircle, Plus, Edit, Trash2, ToggleLeft, ToggleRight, Users, BarChart3 } from 'lucide-react';
 
 interface UserManagementProps {
   className?: string;
@@ -610,7 +610,7 @@ function EditUserForm({ user, onSubmit, onCancel }: {
 }
 
 // Componente de estadísticas
-function StatsPanel({ stats, loading }: { stats: any; loading: boolean }) {
+function StatsPanel({ stats, loading }: { stats: unknown; loading: boolean }) {
   if (loading) {
     return (
       <Card>

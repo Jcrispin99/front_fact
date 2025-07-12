@@ -82,7 +82,7 @@ export function GenericTable<T>({
   title,
   description,
   searchPlaceholder = "Buscar...",
-  searchableColumns = [],
+  //searchableColumns = [],
   filters = [],
   enableColumnVisibility = true,
   enablePagination = true,
